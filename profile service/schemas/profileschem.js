@@ -34,5 +34,5 @@ phoneNumber:{
 
 })
 
-
+//export
 module.exports = Profile
