@@ -10,7 +10,7 @@ const mongoconnection =  mongoose.connect(process.env.mongoConnect,{
         useUnifiedTopology:true
     })
 
-    .then(()=>{console.log("connected to the db")})
+    .then(()=>{console.log("connected to the mongodb ")})
     .catch((error)=>{
         console.log(`${error}`)
     })

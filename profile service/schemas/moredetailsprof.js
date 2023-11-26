@@ -30,31 +30,20 @@ RelationshipStatus:{
 },
 Desireandwants:{
     type:Sequelize.STRING
-},
-phoneNumber:{
-    type:Sequelize.TEXT,
- 
-    unique:true,
-    allowNull:false,
-    references:{
-        model:"Profile",
-        key:"phoneNumber"
-    }
 }
-
-
 
 
 
 })
 
+ 
+  
 
-
-
-
-
-
-Furtherdetails.belongsTo(Profile)
+Furtherdetails.belongsTo(Profile, {
+    foreignKey: "phoneNumber",  
+    targetKey: "phoneNumber", 
+    constraints:false
+  });  
 
 
 module.exports = Furtherdetails

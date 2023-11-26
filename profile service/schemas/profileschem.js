@@ -1,6 +1,6 @@
 const db = require("../db/connection")
 const Sequelize = db.Sequelize
-const sequelize = db.Sequelize
+const sequelize = db.sequelize
 
 
 
