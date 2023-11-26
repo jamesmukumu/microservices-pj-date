@@ -1,9 +1,9 @@
 const router = require("express").Router()
 
-const createdProfile = require('../controllers/profilecontent')
+const {makeProfile,seeProfile} = require('../controllers/profilecontent')
 
 
 
-router.post('/create/profile',createdProfile)
-
-module.exports = router
+router.post('/create/profile',makeProfile)
+router.get('/get/profile/details',seeProfile)
+module.exports = router 

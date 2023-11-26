@@ -1,24 +1,4 @@
 const Furtherdetails = require("../schemas/moredetailsprof")
-const amqp = require("amqplib")
-var channel,connection
-
-
-//create a channel communication
-
-async function Connectionwithuserservice(){
-try {
-
-    const rabbitServer = "amqp://localhost:5672"
-    connection = await amqp.connect(rabbitServer)
-    channel = await connection.createChannel() 
-    await channel.assertQueue("communication")    
-
-} catch (error) {
-    console.log(error) 
-}  
-   
-}
- 
 
 
 // add more profile details

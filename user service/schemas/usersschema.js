@@ -24,7 +24,11 @@ Email:{
     required:true,
     unique:true
 },
-
+phoneNumber:{
+    type:Number,
+    required:true,
+    unique:true
+},
 recoveryPassword:{
     type:[String,Number],
     required:false,

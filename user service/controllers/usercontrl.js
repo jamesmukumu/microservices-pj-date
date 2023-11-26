@@ -2,6 +2,37 @@ const User = require("../schemas/usersschema")
 const crypto = require('crypto')
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
+const amqp = require("amqplib")
+
+var channel
+var connection
+
+
+
+
+//function to connect to amqp
+async function makeChannelconnection(){
+try {
+    let rabbitServer = "amqp://localhost:5672"
+    connection = await amqp.connect(rabbitServer)
+    channel = await connection.createChannel()
+    await channel.assertQueue('phoneNumber')
+    
+} catch (error) {
+    console.log(error)
+}
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 //generate random hex
@@ -30,7 +61,8 @@ secondname:req.body.secondname,
 username:req.body.username,
 password:hashedPassword,
 recoveryPassword:recevorypass,
-Email:req.body.Email
+Email:req.body.Email,
+phoneNumber:req.body.phoneNumber
 
 })
  
@@ -56,10 +88,11 @@ return res.status(500).json({error:"username already exists"})
 
 
 
-
+ 
 // login user
 async function loginUser(req,res){
-try {
+try { 
+ await makeChannelconnection()
 const foundUser = await User.findOne({username:req.body.username})
 if(!foundUser){
 return res.status(200).json({message:"User does not have account"})
@@ -69,17 +102,19 @@ if(!matchingPassword){
 return res.status(200).json({message:"invalid password"})
 }
 else if(matchingPassword){
-const token = jwt.sign({foundUser},process.env.jwtpassword,{expiresIn:"1h"})
-return res.status(200).setHeader("Authorization",token).json({message:"Valid credentials"})
-}
+    const token = jwt.sign({foundUser},process.env.jwtpassword,{expiresIn:"1h"})
+    const cont = await channel.sendToQueue("profileNumber",Buffer.from(JSON.stringify(foundUser.phoneNumber)))
+    // console.log(cont)
+    await channel.close
+    await connection.close
+    return res.status(200).setHeader("Authorization",token).json({message:"Valid credentials",data:foundUser.phoneNumber})
+  }
+  
     
 } catch (error) {
     return res.status(500).json({error:`${error}`})
 }
 }
-
-
-
 
 
 

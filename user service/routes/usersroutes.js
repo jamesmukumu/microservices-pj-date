@@ -7,3 +7,4 @@ router.post('/register/user',Registeruser)
 router.post('/login/user',loginUser)
 router.put('/change/password',changePassword)
 module.exports = router
+ 
