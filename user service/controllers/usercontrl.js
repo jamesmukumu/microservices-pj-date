@@ -10,6 +10,10 @@ var connection
 
 
 
+
+
+
+
 //function to connect to amqp
 async function makeChannelconnection(){
 try {

@@ -79,9 +79,64 @@ else if(findAccountbyphone){
 
 
 
+// filter on ages
+
+
+async function filterSearchesonages(req,res){
+try {
+const lowerAgelimit = req.query.lowerage
+const higherAgelimit = req.query.higherage
+
+const profilesFittingagequery = await Profile.findAll({where:{age:{[Sequelize.Op.gte]:lowerAgelimit,[Sequelize.Op.lte]:higherAgelimit}}})
+if(profilesFittingagequery.length === 0){
+return res.status(200).json({message:"No ages found based on your search"})
+}
+else if(profilesFittingagequery){
+    
+
+  // show further details to
+for(let numberphone of profilesFittingagequery){
+  const additionalInfo = await Furtherdetails.findAll({where:{phoneNumber:numberphone.phoneNumber}})
+  
+  return res.status(200).json({profile:profilesFittingagequery,additionaldet:additionalInfo})
+}
+}
+  
+} catch (error) {
+  return res.status(500).json({error:`${error}`})
+}
+}
 
 
 
+
+
+
+
+// filter on nationality
+
+async function filterOnnationality(req,res){
+try {
+
+const nationalityQuery = req.query.Nationality
+
+const matchingNationalities = await Profile.findAll({where:{Nationality:{[Sequelize.Op.iLike]:`%${nationalityQuery}%`}}})
+
+if(matchingNationalities.length===0){
+return res.status(200).json({message:"No results found based on the search"})
+}
+else if(matchingNationalities){
+for(let national of matchingNationalities){
+const matchingNationalitiesandaddprofile = await Furtherdetails.findAll({where:{phoneNumber:national.phoneNumber}})
+return res.status(200).json({profile:matchingNationalities,addtionals:matchingNationalitiesandaddprofile})
+}
+}
+  
+} catch (error) {
+  return res.status(500).json({error:`${error}`})
+}
+
+}
 
 
 
@@ -101,6 +156,8 @@ else if(findAccountbyphone){
 
 module.exports = {
 makeProfile,
-seeProfile
+seeProfile,
+filterSearchesonages,
+filterOnnationality
 
 }

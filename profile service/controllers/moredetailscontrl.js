@@ -2,10 +2,10 @@ const Furtherdetails = require("../schemas/moredetailsprof")
 
 
 // add more profile details
-
+//
 async function Addprofileinfo(req,res){
 try {
-    await Connectionwithuserservice()
+    
     const {Hobbies,imageMain,image2,image3,image4,RelationshipStatus,Desireandwants,phoneNumber} = req.body
     const inserterdAdditionalprofile = new Furtherdetails({Hobbies,imageMain,image2,image3,image4,RelationshipStatus,Desireandwants,phoneNumber})
     await inserterdAdditionalprofile.save()
@@ -17,6 +17,22 @@ try {
 } catch (error) {
     return res.status(500).json({error:`${error}`})
 }} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 module.exports = Addprofileinfo

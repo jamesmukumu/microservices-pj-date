@@ -6,7 +6,9 @@ const sequelize = db.sequelize
 
 const Furtherdetails  = sequelize.define("additionaldetails",{
 Hobbies:{
-    type:Sequelize.TEXT
+    type:Sequelize.TEXT,
+    allowNull:false,
+   
 },
 imageMain:{
     type:Sequelize.TEXT,
@@ -26,10 +28,16 @@ image4:{
 },
 RelationshipStatus:{
     type:Sequelize.STRING,
-    allowNull:false
+    allowNull:false,
+    validate:{
+        isIn:[["Single","Dating","Complicated","Married","Divorced","Searching","Looking for fun"]]
+    }
 },
 Desireandwants:{
-    type:Sequelize.STRING
+    type:Sequelize.STRING,
+    validate:{
+        isIn:[['Fun','One night stand','Sex','Seeking love']]
+    }
 }
 
 
