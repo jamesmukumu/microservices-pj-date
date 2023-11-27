@@ -8,6 +8,34 @@ var channel
 var connection
 
 
+var connectionmscommunication
+var channelCommunicationms
+
+
+
+
+
+
+
+//function for sending username to communicationMicroservice
+ async function sendUsernametocommunicatiosms(){
+try {
+  const rabbitServer = "amqp://localhost:5672"
+   connectionmscommunication = await amqp.connect(rabbitServer)
+   channelCommunicationms = await connectionmscommunication.createChannel()
+   await channelCommunicationms.assertQueue("sendUsername")
+    
+} catch (error) {
+    console.log(error)
+}
+
+}
+
+
+
+
+
+
 
 
 
@@ -91,12 +119,13 @@ return res.status(500).json({error:"username already exists"})
 
 
 
-
+  
  
 // login user
 async function loginUser(req,res){
 try { 
  await makeChannelconnection()
+ await sendUsernametocommunicatiosms()
 const foundUser = await User.findOne({username:req.body.username})
 if(!foundUser){
 return res.status(200).json({message:"User does not have account"})
@@ -111,7 +140,16 @@ else if(matchingPassword){
     // console.log(cont)
     await channel.close
     await connection.close
-    return res.status(200).setHeader("Authorization",token).json({message:"Valid credentials",data:foundUser.phoneNumber})
+
+
+const usernamesent = await channelCommunicationms.sendToQueue("sendUsername",Buffer.from(JSON.stringify(foundUser.username)))
+console.log(usernamesent)
+await channelCommunicationms.close
+await connectionmscommunication.close
+
+
+
+ return res.status(200).setHeader("Authorization",token).json({message:"Valid credentials",data:foundUser.phoneNumber})
   }
   
     
