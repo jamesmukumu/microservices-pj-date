@@ -3,7 +3,7 @@ const dotenv = require("dotenv")
 dotenv.config()
 
 
-
+mongoose.set("debug",true)
 
 const mongoconnection =  mongoose.connect(process.env.mongoConnect,{
         useNewUrlParser:true,
@@ -15,4 +15,4 @@ const mongoconnection =  mongoose.connect(process.env.mongoConnect,{
         console.log(`${error}`)
     })
 
-module.exports = mongoconnection 
+module.exports = mongoconnection  
