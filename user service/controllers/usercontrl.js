@@ -5,8 +5,8 @@ const jwt = require("jsonwebtoken")
 const amqp = require("amqplib")
 const nodemailer = require("nodemailer")
 
-var channel
-var connection
+var channelforphonenumber
+var connectionforphonenumber
 
 
 var connectionmscommunication
@@ -16,7 +16,8 @@ var channelCommunicationms
 var channelfortoken
 var connectionfortoken
 
-
+var channelEmail
+var connectionEmail
 
 
 const transpoter = nodemailer.createTransport({
@@ -85,10 +86,10 @@ try {
 //function to connect to amqp
 async function makeChannelconnection(){
 try {
-    let rabbitServer = "amqp://localhost:5672"
-    connection = await amqp.connect(rabbitServer)
-    channel = await connection.createChannel()
-    await channel.assertQueue('phoneNumber')
+
+    connectionforphonenumber = await amqp.connect("amqp://localhost:5672")
+    channelforphonenumber = await connectionforphonenumber.createChannel()
+    await channelforphonenumber.assertQueue("phonenumber")
     
 } catch (error) {
     console.log(error)
@@ -96,6 +97,20 @@ try {
 }
 
 
+
+
+//send Email to payment on login    
+async function sendEmailtopayments(){
+try{
+connectionEmail = await amqp.connect('amqp://localhost:5672')
+channelEmail = await connectionEmail.createChannel()
+await channelEmail.assertQueue("useremail")
+}
+catch(error){
+console.log(error)
+}
+
+}
 
 
 
@@ -167,14 +182,15 @@ return res.status(500).json({error:"username already exists"})
   
  
 // login user
-async function loginUser(req,res){
+async function loginUser(req,res){ 
 try { 
     await sendTokentoms()
  await makeChannelconnection()
  await sendUsernametocommunicatiosms()
+ await sendEmailtopayments()
 const foundUser = await User.findOne({username:req.body.username})
 if(!foundUser){
-return res.status(200).json({message:"User does not have account"})
+return res.status(200).json({message:"User does not have account"})    
 }
 const matchingPassword = await bcrypt.compare(req.body.password,foundUser.password[0])
 if(!matchingPassword){
@@ -183,10 +199,10 @@ return res.status(200).json({message:"invalid password"})
 else if(matchingPassword){
     const token = jwt.sign({foundUser},process.env.jwtpassword,{expiresIn:"1h"})
 
-    const cont = await channel.sendToQueue("profileNumber",Buffer.from(JSON.stringify(foundUser.phoneNumber)))
+    const cont = await channelforphonenumber.sendToQueue("phonenumber",Buffer.from(JSON.stringify(foundUser.phoneNumber)))
     // console.log(cont)
-    await channel.close
-    await connection.close
+    await channelforphonenumber.close
+    await connectionforphonenumber.close
 
 
 const usernamesent = await channelCommunicationms.sendToQueue("sendUsername",Buffer.from(JSON.stringify(foundUser.username)))
@@ -202,9 +218,19 @@ console.log(tokenSent)
 await channelfortoken.close
 await connectionfortoken.close
 
+
+
+
+
+const emailSent = await channelEmail.sendToQueue("useremail",Buffer.from(JSON.stringify(foundUser.Email)))
+console.log(emailSent)
+await channelEmail.close
+await connectionEmail.close
+
+
  return res.status(200).setHeader("Authorization",token).json({message:"Valid credentials",data:foundUser.phoneNumber})
   }
-  
+   
     
 } catch (error) {
     return res.status(500).json({error:`${error}`})

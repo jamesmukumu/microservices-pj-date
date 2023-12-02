@@ -1,5 +1,5 @@
 const db = require("../db/connection")
-const Profile = require('./profileschem')
+
 const Sequelize = db.Sequelize
 const sequelize = db.sequelize
 
@@ -43,15 +43,10 @@ Desireandwants:{
 
 
 })
-
+ 
  
   
 
-Furtherdetails.belongsTo(Profile, {
-    foreignKey: "phoneNumber",  
-    targetKey: "phoneNumber", 
-    constraints:false
-  });  
 
 
 module.exports = Furtherdetails

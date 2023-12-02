@@ -1,7 +1,7 @@
 const db = require("../db/connection")
 const Sequelize = db.Sequelize
 const sequelize = db.sequelize
-
+const Furtherdetails = require('./moredetailsprof')
 
 
 const Profile = sequelize.define("profilestable",{
@@ -21,18 +21,20 @@ birthDate:{
 },
 Nationality:{
     type:Sequelize.STRING,
-    allowNull:false
+    allowNull:false 
 },
 phoneNumber:{
     type:Sequelize.TEXT,
     primaryKey:true,
     unique:true
 }
-
-
+ 
 
 
 })
+Profile.hasOne(Furtherdetails)
+
+Profile.sync()
 
 //export
 module.exports = Profile

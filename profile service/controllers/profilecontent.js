@@ -2,35 +2,36 @@ const Profile = require('../schemas/profileschem')
 const Furtherdetails = require("../schemas/moredetailsprof")
 const Sequelize = require("sequelize")
 const amqp = require('amqplib')
-var channel
-var connection
+
+var channelforphonenumber
+var connectionforphonenumber
 var phoneNumberfromuserService
 //make a connection to the user service to receivePhonenumber when loggin in
 
-
-async function Connectionwithuserservice(){
+ 
+async function connectionwithUserservice(){
   try {
   
-      const rabbitServer = "amqp://localhost:5672"
-      connection = await amqp.connect(rabbitServer)
-      channel = await connection.createChannel() 
-      await channel.assertQueue("profileNumber")  
-      channel.consume("profileNumber",(data)=>{
+       
+      connectionforphonenumber = await amqp.connect("amqp://localhost:5672")
+      channelforphonenumber = await connectionforphonenumber.createChannel() 
+      await channelforphonenumber.assertQueue("phonenumber")  
+     await channelforphonenumber.consume("phonenumber",(data)=>{
        phoneNumberfromuserService = `0${Buffer.from(data.content)}`
        console.log(phoneNumberfromuserService)
-     channel.ack(data)
-      })  
+     channelforphonenumber.ack(data)
+      })   
    
-  } catch (error) {
-      console.log(error) 
-  }  
+  } catch (error) { 
+      console.log(error)  
+  }     
       
   }
-  Connectionwithuserservice();
 
 
 
 
+ 
 
 
 
@@ -55,25 +56,26 @@ return res.status(200).json({message:"Profile created"})
 
 
 
-  
+   
 //see a own profile after loggin in
 
 async function seeProfile(req,res){
 try {
-const findAccountbyphone = await Profile.findOne({where:{phoneNumber:phoneNumberfromuserService}})
+await connectionwithUserservice()
+const findAccountbyphone = await Profile.findOne({where:{phoneNumber:phoneNumberfromuserService},include:{model:Furtherdetails}})
 if(!findAccountbyphone){
 return res.status(200).json({message:"No account found"})
 }
-else if(findAccountbyphone){
-  const furtherprofileinfo = await Furtherdetails.findOne({where:{phoneNumber:{[Sequelize.Op.eq]:phoneNumberfromuserService}}})
-  return res.status(200).json({profile:findAccountbyphone,additionalDetails:furtherprofileinfo})
-}
+else{
+  
+  return res.status(200).json({message:"profile fetched",data:findAccountbyphone})
+} 
 } catch (error) {  
   return res.status(500).json({error:`${error}`})
+} 
 }
-}
-
-
+ 
+ 
 
 
 
@@ -142,6 +144,55 @@ return res.status(200).json({profile:matchingNationalities,addtionals:matchingNa
 
 
 
+//fetch matching 
+
+async function fetchMatchingprofiles(req,res){
+try{
+  await connectionwithUserservice()
+  const userProf = await Profile.findOne({where:{phoneNumber:phoneNumberfromuserService}})
+  if(!userProf){
+ return res.status(200).json({message:"No profile"})
+  }
+
+else if(userProf){
+const allMatichingprofile = await Profile.findAll({
+  where: {
+    [Sequelize.Op.or]: [
+      {
+        Nationality: userProf.Nationality
+      },
+      {
+        age: { [Sequelize.Op.eq]: userProf.age }
+      },
+      {
+        phoneNumber: {
+          [Sequelize.Op.ne]: phoneNumberfromuserService
+        }
+      }
+    ]
+  },
+  include:{model:Furtherdetails}
+  
+});
+
+
+return res.status(200).json({message:"Matching profile",data:allMatichingprofile})
+}
+
+}
+catch(error){
+
+return res.status(500).json({error:`${error}`})
+}
+
+
+
+
+}
+
+
+
+
 
 
 
@@ -158,6 +209,7 @@ module.exports = {
 makeProfile,
 seeProfile,
 filterSearchesonages,
-filterOnnationality
+filterOnnationality,
+fetchMatchingprofiles
 
 }

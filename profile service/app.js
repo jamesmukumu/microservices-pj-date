@@ -40,13 +40,12 @@ try {
    console.log(error) 
 } 
 
+const serverport = process.env.myport
 
 
 
 
 
-
-
-server.listen(5000,()=>{
-    console.log("app listening at 5000")
+server.listen(serverport,()=>{
+    console.log(`app listening for request at ${serverport}`)
 })

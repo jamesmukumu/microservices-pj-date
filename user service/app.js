@@ -51,6 +51,6 @@ try {
 
 
 
-  server.listen(7000,()=>{
+  server.listen(process.env.port,()=>{
     console.log("app listening at 7000")
   })
